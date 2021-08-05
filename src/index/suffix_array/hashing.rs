@@ -43,7 +43,7 @@ impl Hashing {
         let offsets = counts;
 
         let mut pos = offsets.clone();
-        let mut ssa = vec![0; array.len()];
+        let mut ssa = vec![0; cum_sum as usize];
         for s in array.into_iter() {
             if s as usize + k > text.len() {
                 continue;
