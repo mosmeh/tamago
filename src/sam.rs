@@ -52,7 +52,7 @@ pub fn write_mapping_single<W: io::Write>(
         rc
     } else {
         *rc_seq_cache = Some(reverse_complement(seq));
-        &rc_seq_cache.as_ref().unwrap()
+        rc_seq_cache.as_ref().unwrap()
     };
 
     out.write_all(qname)?;

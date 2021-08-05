@@ -111,14 +111,14 @@ impl Mapper<'_> {
 
         match (self.library_type, is_read1) {
             (LibraryType::Unstranded, _) => {
-                seed(&query, Strand::Forward);
-                seed(&rc_query, Strand::Reverse);
+                seed(query, Strand::Forward);
+                seed(rc_query, Strand::Reverse);
             }
             (LibraryType::FirstStrand, false) | (LibraryType::SecondStrand, true) => {
-                seed(&query, Strand::Forward);
+                seed(query, Strand::Forward);
             }
             (LibraryType::SecondStrand, false) | (LibraryType::FirstStrand, true) => {
-                seed(&rc_query, Strand::Reverse);
+                seed(rc_query, Strand::Reverse);
             }
         }
 

@@ -29,7 +29,7 @@ impl Hashing {
             {
                 continue;
             }
-            counts[xxh32(&seq, 0) as usize & mask] += 1;
+            counts[xxh32(seq, 0) as usize & mask] += 1;
         }
 
         let mut cum_sum = 0;
@@ -55,7 +55,7 @@ impl Hashing {
             {
                 continue;
             }
-            let idx = xxh32(&seq, 0) as usize & mask;
+            let idx = xxh32(seq, 0) as usize & mask;
             let p = pos[idx] as usize;
             ssa[p] = s;
             pos[idx] += 1;

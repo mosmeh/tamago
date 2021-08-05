@@ -85,7 +85,7 @@ fn map_single<'a, W: Write>(
     _qname: &[u8],
     seq: &[u8],
 ) -> Result<bool> {
-    let encoded_seq = sequence::encode(&seq);
+    let encoded_seq = sequence::encode(seq);
 
     let mappings = mapper.map_single(&encoded_seq);
     Ok(!mappings.is_empty())

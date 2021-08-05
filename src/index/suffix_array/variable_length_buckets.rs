@@ -17,7 +17,6 @@ impl VariableLengthBuckets {
         assert!(text.len() <= u32::MAX as usize + 1);
 
         let sa = SA::<i32>::new(text);
-        let array: Vec<_> = sa.sarray.into_iter().map(|x| x as u32).collect();
 
         let offsets_len = 1 << (2 * k);
         let mut counts = vec![0u32; offsets_len];
@@ -45,7 +44,7 @@ impl VariableLengthBuckets {
         let mut ssa = Vec::new();
         let mut buckets = vec![u32::MAX; buckets_len];
         let mut prev_bucket = 0;
-        for s in array.into_iter() {
+        for s in sa.sarray.into_iter().map(|x| x as u32) {
             if s as usize + k > text.len() {
                 continue;
             }
