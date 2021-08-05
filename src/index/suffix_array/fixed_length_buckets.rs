@@ -135,4 +135,15 @@ impl super::SuffixArrayImpl for FixedLengthBuckets {
             Some((begin..end, depth))
         }
     }
+
+    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
+        let mut map = std::collections::BTreeMap::new();
+        for i in 0..(self.offsets.len() - 1) {
+            let size = self.offsets[i + 1] - self.offsets[i];
+            map.entry(size as usize)
+                .and_modify(|i| *i += 1)
+                .or_insert(1);
+        }
+        Some(map)
+    }
 }

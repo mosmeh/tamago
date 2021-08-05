@@ -28,6 +28,8 @@ trait SuffixArrayImpl {
         min_len: usize,
         max_hits: usize,
     ) -> Option<(Range<usize>, usize)>;
+
+    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>>;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -73,6 +75,15 @@ impl SuffixArray {
             Self::VariableLengthBuckets(sa) => sa.extension_search(text, query, min_len, max_hits),
             Self::Hashing(sa) => sa.extension_search(text, query, min_len, max_hits),
             Self::Fringed(sa) => sa.extension_search(text, query, min_len, max_hits),
+        }
+    }
+
+    pub fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
+        match self {
+            Self::FixedLengthBuckets(sa) => sa.bucket_size_distribution(),
+            Self::VariableLengthBuckets(sa) => sa.bucket_size_distribution(),
+            Self::Hashing(sa) => sa.bucket_size_distribution(),
+            Self::Fringed(sa) => sa.bucket_size_distribution(),
         }
     }
 }

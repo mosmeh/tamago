@@ -12,10 +12,14 @@ pub struct StatsCommand {
 impl Command for StatsCommand {
     #[allow(unused_assignments)]
     fn run(self) -> anyhow::Result<()> {
-        let _index: Index = {
+        let index: Index = {
             let reader = BufReader::new(File::open(&self.index)?);
             bincode::deserialize_from(reader)?
         };
+
+        for (k, v) in index.sa.bucket_size_distribution().unwrap().into_iter() {
+            println!("{}\t{}", k, v);
+        }
 
         Ok(())
     }

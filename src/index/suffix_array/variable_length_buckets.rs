@@ -180,4 +180,8 @@ impl super::SuffixArrayImpl for VariableLengthBuckets {
             Some((begin..end, depth))
         }
     }
+
+    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
+        None
+    }
 }
