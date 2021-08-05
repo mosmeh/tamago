@@ -63,6 +63,7 @@ pub struct Mapper<'a> {
     library_type: LibraryType,
     seed_min_len: usize,
     seed_max_hits: usize,
+    sparsity: usize,
 }
 
 impl Mapper<'_> {
@@ -75,7 +76,7 @@ impl Mapper<'_> {
         let mut ref_to_anchors: FxHashMap<(SequenceId, Strand), Vec<Anchor>> = FxHashMap::default();
 
         let mut seed = |query: &[u8], strand| {
-            for seed_pos in 0..=(query.len() - self.seed_min_len) {
+            for seed_pos in (0..=(query.len() - self.seed_min_len)).step_by(self.sparsity) {
                 let result = self.index.sa.extension_search(
                     &self.index.seq,
                     &query[seed_pos..],
@@ -130,6 +131,7 @@ pub struct MapperBuilder<'a> {
     library_type: LibraryType,
     seed_min_len: usize,
     seed_max_hits: usize,
+    sparsity: usize,
 }
 
 impl<'a> MapperBuilder<'a> {
@@ -139,6 +141,7 @@ impl<'a> MapperBuilder<'a> {
             library_type: LibraryType::Unstranded,
             seed_min_len: 31,
             seed_max_hits: 10,
+            sparsity: 1,
         }
     }
 
@@ -157,12 +160,18 @@ impl<'a> MapperBuilder<'a> {
         self
     }
 
+    pub fn sparsity(&mut self, sparsity: usize) -> &mut Self {
+        self.sparsity = sparsity;
+        self
+    }
+
     pub fn build(&self) -> Mapper<'a> {
         Mapper {
             index: self.index,
             library_type: self.library_type,
             seed_min_len: self.seed_min_len,
             seed_max_hits: self.seed_max_hits,
+            sparsity: self.sparsity,
         }
     }
 }

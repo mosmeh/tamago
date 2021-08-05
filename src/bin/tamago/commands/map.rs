@@ -31,6 +31,8 @@ pub struct MapCommand {
     seed_min_len: usize,
     #[structopt(short, default_value = "1000")]
     multiplicity: usize,
+    #[structopt(short, default_value = "1")]
+    sparsity: usize,
 
     #[structopt(long)]
     header_sep: Option<String>,
@@ -58,6 +60,7 @@ impl Command for MapCommand {
             .library_type(self.library_type)
             .seed_min_len(self.seed_min_len)
             .seed_max_hits(self.multiplicity)
+            .sparsity(self.sparsity)
             .build();
 
         let start_time = Instant::now();
