@@ -18,7 +18,7 @@ pub enum SuffixArrayConfig {
     Fringed { l: usize },
 }
 
-trait SuffixArrayImpl {
+trait SuffixArrayVariant {
     fn index_to_pos(&self, index: usize) -> usize;
 
     fn extension_search(

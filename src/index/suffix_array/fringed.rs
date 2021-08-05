@@ -102,7 +102,7 @@ impl Fringed {
     }
 }
 
-impl super::SuffixArrayImpl for Fringed {
+impl super::SuffixArrayVariant for Fringed {
     fn index_to_pos(&self, index: usize) -> usize {
         self.array[index] as usize
     }

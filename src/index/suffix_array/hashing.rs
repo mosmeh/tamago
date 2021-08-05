@@ -70,7 +70,7 @@ impl Hashing {
     }
 }
 
-impl super::SuffixArrayImpl for Hashing {
+impl super::SuffixArrayVariant for Hashing {
     fn index_to_pos(&self, index: usize) -> usize {
         self.array[index] as usize
     }

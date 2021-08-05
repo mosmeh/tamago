@@ -5,9 +5,9 @@ use sufsort_rs::sufsort::SA;
 
 #[derive(Serialize, Deserialize)]
 pub struct FixedLengthBuckets {
-    pub array: Vec<u32>,
-    pub offsets: Vec<u32>,
-    pub bucket_width: usize,
+    array: Vec<u32>,
+    offsets: Vec<u32>,
+    bucket_width: usize,
 }
 
 impl FixedLengthBuckets {
@@ -70,7 +70,7 @@ impl FixedLengthBuckets {
     }
 }
 
-impl super::SuffixArrayImpl for FixedLengthBuckets {
+impl super::SuffixArrayVariant for FixedLengthBuckets {
     fn index_to_pos(&self, i: usize) -> usize {
         self.array[i] as usize
     }

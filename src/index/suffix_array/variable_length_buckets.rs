@@ -102,7 +102,7 @@ impl VariableLengthBuckets {
     }
 }
 
-impl super::SuffixArrayImpl for VariableLengthBuckets {
+impl super::SuffixArrayVariant for VariableLengthBuckets {
     fn index_to_pos(&self, index: usize) -> usize {
         self.array[index] as usize
     }
