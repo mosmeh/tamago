@@ -5,7 +5,10 @@ use std::{
     path::PathBuf,
 };
 use structopt::StructOpt;
-use tamago::index::{suffix_array::SuffixArrayConfig, IndexBuilder};
+use tamago::index::{
+    suffix_array::{HashFunc, SuffixArrayConfig},
+    IndexBuilder,
+};
 
 #[derive(StructOpt, Debug)]
 pub struct IndexCommand {
@@ -57,6 +60,8 @@ enum SuffixArrayOpt {
         k: usize,
         #[structopt(short, long)]
         bits: usize,
+        #[structopt(short, long, default_value = "xxhash")]
+        hash: HashFunc,
     },
     Fringed {
         #[structopt(short)]
@@ -69,7 +74,11 @@ impl From<SuffixArrayOpt> for SuffixArrayConfig {
         match opt {
             SuffixArrayOpt::FixedLengthBuckets { len } => Self::FixedLengthBuckets { len },
             SuffixArrayOpt::VariableLengthBuckets { k, f } => Self::VariableLengthBuckets { k, f },
-            SuffixArrayOpt::Hashing { k, bits } => Self::Hashing { k, bits },
+            SuffixArrayOpt::Hashing { k, bits, hash } => Self::Hashing {
+                k,
+                bits,
+                hash_func: hash,
+            },
             SuffixArrayOpt::Fringed { l } => Self::Fringed { l },
         }
     }

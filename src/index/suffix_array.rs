@@ -3,6 +3,8 @@ mod fringed;
 mod hashing;
 mod variable_length_buckets;
 
+pub use hashing::HashFunc;
+
 use fixed_length_buckets::FixedLengthBuckets;
 use fringed::Fringed;
 use hashing::Hashing;
@@ -12,10 +14,21 @@ use serde::{Deserialize, Serialize};
 use std::ops::Range;
 
 pub enum SuffixArrayConfig {
-    FixedLengthBuckets { len: usize },
-    VariableLengthBuckets { k: usize, f: f64 },
-    Hashing { k: usize, bits: usize },
-    Fringed { l: usize },
+    FixedLengthBuckets {
+        len: usize,
+    },
+    VariableLengthBuckets {
+        k: usize,
+        f: f64,
+    },
+    Hashing {
+        k: usize,
+        bits: usize,
+        hash_func: HashFunc,
+    },
+    Fringed {
+        l: usize,
+    },
 }
 
 trait SuffixArrayVariant {
@@ -49,7 +62,9 @@ impl SuffixArray {
             SuffixArrayConfig::VariableLengthBuckets { k, f } => {
                 Self::VariableLengthBuckets(VariableLengthBuckets::new(text, *k, *f))
             }
-            SuffixArrayConfig::Hashing { k, bits } => Self::Hashing(Hashing::new(text, *k, *bits)),
+            SuffixArrayConfig::Hashing { k, bits, hash_func } => {
+                Self::Hashing(Hashing::new(text, *k, *bits, *hash_func))
+            }
             SuffixArrayConfig::Fringed { l } => Self::Fringed(Fringed::new(text, *l)),
         }
     }

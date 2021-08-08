@@ -1,25 +1,74 @@
 use serde::{Deserialize, Serialize};
-use std::ops::Range;
+use std::{ops::Range, str::FromStr};
 use sufsort_rs::sufsort::SA;
-use xxhash_rust::xxh32::xxh32;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum HashFunc {
+    XxHash,
+    Fnv,
+    MurmurHash,
+    Crc32,
+}
+
+impl FromStr for HashFunc {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "xxhash" => Ok(Self::XxHash),
+            "fnv" => Ok(Self::Fnv),
+            "murmur" | "murmur3" | "murmurhash" => Ok(Self::MurmurHash),
+            "crc32" => Ok(Self::Crc32),
+            _ => Err(format!("Unknown hash function '{}'", s)),
+        }
+    }
+}
+
+impl HashFunc {
+    #[inline]
+    fn hash(&self, x: &[u8]) -> u32 {
+        match self {
+            HashFunc::XxHash => xxhash_rust::xxh32::xxh32(x, 0),
+            HashFunc::Fnv => {
+                use hash32::Hasher;
+                let mut hasher = hash32::FnvHasher::default();
+                hasher.write(x);
+                hasher.finish()
+            }
+            HashFunc::MurmurHash => {
+                use hash32::Hasher;
+                let mut hasher = hash32::Murmur3Hasher::default();
+                hasher.write(x);
+                hasher.finish()
+            }
+            HashFunc::Crc32 => {
+                let mut hasher = crc32fast::Hasher::new();
+                hasher.update(x);
+                hasher.finalize()
+            }
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct Hashing {
     array: Vec<u32>,
     offsets: Vec<u32>,
     k: usize,
-    mask: usize,
+    hash_func: HashFunc,
+    mask: u32,
 }
 
 impl Hashing {
-    pub fn new(text: &[u8], k: usize, bits: usize) -> Self {
+    pub fn new(text: &[u8], k: usize, bits: usize, hash_func: HashFunc) -> Self {
         assert!(text.len() <= u32::MAX as usize + 1);
 
         let sa = SA::<i32>::new(text);
-        let array: Vec<_> = sa.sarray.into_iter().map(|x| x as u32).collect();
+        let sa = sa.sarray.into_iter().map(|x| x as u32);
 
         let hashtable_len = 1 << bits;
-        let mask = hashtable_len - 1;
+        let mask = (hashtable_len - 1) as u32;
+
         let mut counts = vec![0u32; hashtable_len];
         for i in 0..=(text.len() - k) {
             let seq = &text[i..i + k];
@@ -29,7 +78,7 @@ impl Hashing {
             {
                 continue;
             }
-            counts[xxh32(seq, 0) as usize & mask] += 1;
+            counts[(hash_func.hash(seq) & mask) as usize] += 1;
         }
 
         let mut cum_sum = 0;
@@ -43,8 +92,8 @@ impl Hashing {
         let offsets = counts;
 
         let mut pos = offsets.clone();
-        let mut ssa = vec![0; cum_sum as usize];
-        for s in array.into_iter() {
+        let mut array = vec![0; cum_sum as usize];
+        for s in sa {
             if s as usize + k > text.len() {
                 continue;
             }
@@ -55,16 +104,16 @@ impl Hashing {
             {
                 continue;
             }
-            let idx = xxh32(seq, 0) as usize & mask;
-            let p = pos[idx] as usize;
-            ssa[p] = s;
+            let idx = (hash_func.hash(seq) & mask) as usize;
+            array[pos[idx] as usize] = s;
             pos[idx] += 1;
         }
 
         Self {
-            array: ssa,
+            array,
             offsets,
             k,
+            hash_func,
             mask,
         }
     }
@@ -82,9 +131,9 @@ impl super::SuffixArrayVariant for Hashing {
         min_len: usize,
         max_hits: usize,
     ) -> Option<(Range<usize>, usize)> {
-        let hash = xxh32(&query[..self.k], 0) as usize & self.mask;
-        let mut begin = self.offsets[hash] as usize;
-        let mut end = self.offsets[hash + 1] as usize;
+        let idx = (self.hash_func.hash(&query[..self.k]) & self.mask) as usize;
+        let mut begin = self.offsets[idx] as usize;
+        let mut end = self.offsets[idx + 1] as usize;
         if begin == end {
             return None;
         }
