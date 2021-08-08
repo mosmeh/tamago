@@ -3,12 +3,12 @@ mod fringed;
 mod hashing;
 mod variable_length_buckets;
 
-pub use hashing::HashFunc;
-
 use fixed_length_buckets::FixedLengthBuckets;
 use fringed::Fringed;
 use hashing::Hashing;
 use variable_length_buckets::VariableLengthBuckets;
+
+use crate::hash::HashFunc;
 
 use serde::{Deserialize, Serialize};
 use std::ops::Range;

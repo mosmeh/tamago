@@ -1,54 +1,8 @@
+use crate::hash::HashFunc;
+
 use serde::{Deserialize, Serialize};
-use std::{ops::Range, str::FromStr};
+use std::ops::Range;
 use sufsort_rs::sufsort::SA;
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum HashFunc {
-    XxHash,
-    Fnv,
-    MurmurHash,
-    Crc32,
-}
-
-impl FromStr for HashFunc {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
-            "xxhash" => Ok(Self::XxHash),
-            "fnv" => Ok(Self::Fnv),
-            "murmur" | "murmur3" | "murmurhash" => Ok(Self::MurmurHash),
-            "crc32" => Ok(Self::Crc32),
-            _ => Err(format!("Unknown hash function '{}'", s)),
-        }
-    }
-}
-
-impl HashFunc {
-    #[inline]
-    fn hash(&self, x: &[u8]) -> u32 {
-        match self {
-            HashFunc::XxHash => xxhash_rust::xxh32::xxh32(x, 0),
-            HashFunc::Fnv => {
-                use hash32::Hasher;
-                let mut hasher = hash32::FnvHasher::default();
-                hasher.write(x);
-                hasher.finish()
-            }
-            HashFunc::MurmurHash => {
-                use hash32::Hasher;
-                let mut hasher = hash32::Murmur3Hasher::default();
-                hasher.write(x);
-                hasher.finish()
-            }
-            HashFunc::Crc32 => {
-                let mut hasher = crc32fast::Hasher::new();
-                hasher.update(x);
-                hasher.finalize()
-            }
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct Hashing {

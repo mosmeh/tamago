@@ -5,9 +5,9 @@ use std::{
     path::PathBuf,
 };
 use structopt::StructOpt;
-use tamago::index::{
-    suffix_array::{HashFunc, SuffixArrayConfig},
-    IndexBuilder,
+use tamago::{
+    hash::HashFunc,
+    index::{suffix_array::SuffixArrayConfig, IndexBuilder},
 };
 
 #[derive(StructOpt, Debug)]
