@@ -37,9 +37,6 @@ pub struct MapCommand {
     #[structopt(long)]
     header_sep: Option<String>,
 
-    #[structopt(long, default_value = env!("CARGO_PKG_NAME"))]
-    sam_pg: String,
-
     #[structopt(short, long, default_value = "1")]
     threads: usize,
     #[structopt(short, long, default_value = "1")]
@@ -78,7 +75,7 @@ impl Command for MapCommand {
     }
 }
 
-fn map_single<'a, W: Write>(
+fn map<'a, W: Write>(
     _out: W,
     _index: &Index,
     mapper: &Mapper<'a>,
@@ -87,6 +84,6 @@ fn map_single<'a, W: Write>(
 ) -> Result<bool> {
     let encoded_seq = sequence::encode(seq);
 
-    let mappings = mapper.map_single(&encoded_seq);
+    let mappings = mapper.map(&encoded_seq);
     Ok(!mappings.is_empty())
 }

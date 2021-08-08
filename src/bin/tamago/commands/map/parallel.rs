@@ -12,7 +12,7 @@ use std::{
 };
 use tamago::{index::Index, mapper::Mapper, utils};
 
-struct SingleTask {
+struct Task {
     qname: Vec<u8>,
     seq: Vec<u8>,
 }
@@ -38,7 +38,7 @@ pub fn main(config: MapCommand, index: &Index, mapper: &Mapper) -> Result<()> {
     let mut num_processed = 0;
     let num_mapped = Arc::new(AtomicUsize::new(0));
 
-    eprintln!("Starting single-end mapping");
+    eprintln!("Starting mapping");
 
     let mut reader = fasta::Reader::from_file(config.reads)?;
     let mut record = fasta::Record::new();
@@ -49,7 +49,7 @@ pub fn main(config: MapCommand, index: &Index, mapper: &Mapper) -> Result<()> {
 
         while !record.is_empty() && chunk.len() < chunk_size {
             record.check().map_err(|e| anyhow!(e.to_owned()))?;
-            chunk.push(SingleTask {
+            chunk.push(Task {
                 qname: utils::extract_name_bytes(record.id(), &config.header_sep).to_owned(),
                 seq: record.seq().to_owned(),
             });
@@ -60,7 +60,7 @@ pub fn main(config: MapCommand, index: &Index, mapper: &Mapper) -> Result<()> {
             .par_iter()
             .try_for_each_with::<_, _, Result<()>>(writer_tx.clone(), |tx, task| {
                 let mut buf = Vec::new();
-                let mapped = super::map_single(&mut buf, index, mapper, &task.qname, &task.seq)?;
+                let mapped = super::map(&mut buf, index, mapper, &task.qname, &task.seq)?;
                 if mapped {
                     num_mapped.fetch_add(1, Ordering::Relaxed);
                 }

@@ -11,7 +11,7 @@ pub fn main(config: MapCommand, index: &Index, mapper: &Mapper) -> Result<()> {
     let mut num_processed = 0;
     let mut num_mapped = 0;
 
-    eprintln!("Starting single-end mapping");
+    eprintln!("Starting mapping");
 
     let mut reader = fasta::Reader::from_file(&config.reads)?;
     let mut record = fasta::Record::new();
@@ -21,7 +21,7 @@ pub fn main(config: MapCommand, index: &Index, mapper: &Mapper) -> Result<()> {
         record.check().map_err(|e| anyhow!(e.to_owned()))?;
 
         let qname = utils::extract_name_bytes(record.id(), &config.header_sep);
-        let mapped = super::map_single(&mut out, index, mapper, qname, record.seq())?;
+        let mapped = super::map(&mut out, index, mapper, qname, record.seq())?;
 
         if mapped {
             num_mapped += 1
