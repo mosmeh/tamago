@@ -72,7 +72,7 @@ impl<R: io::Read> IndexBuilder<R> {
     fn from_reader(reader: fasta::Reader<R>) -> Self {
         Self {
             reader,
-            sa_options: SuffixArrayOptions::FixedLengthBuckets { len: 13 },
+            sa_options: SuffixArrayOptions::FixedLengthBuckets { len: 8 },
             header_sep: None,
         }
     }
