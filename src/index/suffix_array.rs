@@ -1,11 +1,13 @@
 mod fixed_length_buckets;
 mod fringed;
 mod hashing;
+mod sa_hash;
 mod variable_length_buckets;
 
 use fixed_length_buckets::FixedLengthBuckets;
 use fringed::Fringed;
 use hashing::Hashing;
+use sa_hash::SaHash;
 use variable_length_buckets::VariableLengthBuckets;
 
 use crate::hash::HashFunc;
@@ -29,6 +31,11 @@ pub enum SuffixArrayOptions {
     Fringed {
         l: usize,
     },
+    SaHash {
+        k: usize,
+        bits: usize,
+        hash_func: HashFunc,
+    },
 }
 
 impl SuffixArrayOptions {
@@ -44,6 +51,9 @@ impl SuffixArrayOptions {
                 SuffixArray::Hashing(Hashing::new(text, *k, *bits, *hash_func))
             }
             Self::Fringed { l } => SuffixArray::Fringed(Fringed::new(text, *l)),
+            Self::SaHash { k, bits, hash_func } => {
+                SuffixArray::SaHash(SaHash::new(text, *k, *bits, *hash_func))
+            }
         }
     }
 }
@@ -68,6 +78,7 @@ pub enum SuffixArray {
     VariableLengthBuckets(VariableLengthBuckets),
     Hashing(Hashing),
     Fringed(Fringed),
+    SaHash(SaHash),
 }
 
 impl SuffixArray {
@@ -77,6 +88,7 @@ impl SuffixArray {
             Self::VariableLengthBuckets(sa) => sa.index_to_pos(index),
             Self::Hashing(sa) => sa.index_to_pos(index),
             Self::Fringed(sa) => sa.index_to_pos(index),
+            Self::SaHash(sa) => sa.index_to_pos(index),
         }
     }
 
@@ -92,6 +104,7 @@ impl SuffixArray {
             Self::VariableLengthBuckets(sa) => sa.extension_search(text, query, min_len, max_hits),
             Self::Hashing(sa) => sa.extension_search(text, query, min_len, max_hits),
             Self::Fringed(sa) => sa.extension_search(text, query, min_len, max_hits),
+            Self::SaHash(sa) => sa.extension_search(text, query, min_len, max_hits),
         }
     }
 
@@ -101,6 +114,7 @@ impl SuffixArray {
             Self::VariableLengthBuckets(sa) => sa.bucket_size_distribution(),
             Self::Hashing(sa) => sa.bucket_size_distribution(),
             Self::Fringed(sa) => sa.bucket_size_distribution(),
+            Self::SaHash(sa) => sa.bucket_size_distribution(),
         }
     }
 }

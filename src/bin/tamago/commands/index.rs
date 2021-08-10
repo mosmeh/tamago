@@ -67,6 +67,14 @@ enum SuffixArrayOpt {
         #[structopt(short)]
         l: usize,
     },
+    SaHash {
+        #[structopt(short)]
+        k: usize,
+        #[structopt(short, long)]
+        bits: usize,
+        #[structopt(short, long, default_value = "xxhash")]
+        hash: HashFunc,
+    },
 }
 
 impl From<SuffixArrayOpt> for SuffixArrayOptions {
@@ -80,6 +88,11 @@ impl From<SuffixArrayOpt> for SuffixArrayOptions {
                 hash_func: hash,
             },
             SuffixArrayOpt::Fringed { l } => Self::Fringed { l },
+            SuffixArrayOpt::SaHash { k, bits, hash } => Self::SaHash {
+                k,
+                bits,
+                hash_func: hash,
+            },
         }
     }
 }
