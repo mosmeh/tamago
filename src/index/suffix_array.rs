@@ -13,7 +13,7 @@ use crate::hash::HashFunc;
 use serde::{Deserialize, Serialize};
 use std::ops::Range;
 
-pub enum SuffixArrayConfig {
+pub enum SuffixArrayOptions {
     FixedLengthBuckets {
         len: usize,
     },
@@ -29,6 +29,23 @@ pub enum SuffixArrayConfig {
     Fringed {
         l: usize,
     },
+}
+
+impl SuffixArrayOptions {
+    pub fn build(&self, text: &[u8]) -> SuffixArray {
+        match self {
+            Self::FixedLengthBuckets { len } => {
+                SuffixArray::FixedLengthBuckets(FixedLengthBuckets::new(text, *len))
+            }
+            Self::VariableLengthBuckets { k, f } => {
+                SuffixArray::VariableLengthBuckets(VariableLengthBuckets::new(text, *k, *f))
+            }
+            Self::Hashing { k, bits, hash_func } => {
+                SuffixArray::Hashing(Hashing::new(text, *k, *bits, *hash_func))
+            }
+            Self::Fringed { l } => SuffixArray::Fringed(Fringed::new(text, *l)),
+        }
+    }
 }
 
 trait SuffixArrayVariant {
@@ -54,21 +71,6 @@ pub enum SuffixArray {
 }
 
 impl SuffixArray {
-    pub fn new(text: &[u8], config: &SuffixArrayConfig) -> Self {
-        match config {
-            SuffixArrayConfig::FixedLengthBuckets { len } => {
-                Self::FixedLengthBuckets(FixedLengthBuckets::new(text, *len))
-            }
-            SuffixArrayConfig::VariableLengthBuckets { k, f } => {
-                Self::VariableLengthBuckets(VariableLengthBuckets::new(text, *k, *f))
-            }
-            SuffixArrayConfig::Hashing { k, bits, hash_func } => {
-                Self::Hashing(Hashing::new(text, *k, *bits, *hash_func))
-            }
-            SuffixArrayConfig::Fringed { l } => Self::Fringed(Fringed::new(text, *l)),
-        }
-    }
-
     pub fn index_to_pos(&self, index: usize) -> usize {
         match self {
             Self::FixedLengthBuckets(sa) => sa.index_to_pos(index),

@@ -7,7 +7,7 @@ use std::{
 use structopt::StructOpt;
 use tamago::{
     hash::HashFunc,
-    index::{suffix_array::SuffixArrayConfig, IndexBuilder},
+    index::{suffix_array::SuffixArrayOptions, IndexBuilder},
 };
 
 #[derive(StructOpt, Debug)]
@@ -26,7 +26,7 @@ impl Command for IndexCommand {
     fn run(self) -> anyhow::Result<()> {
         eprintln!("{:#?}", self);
 
-        let mut builder = IndexBuilder::from_file(self.reference)?.sa_config(self.sa_opt.into());
+        let mut builder = IndexBuilder::from_file(self.reference)?.sa_options(self.sa_opt.into());
         if let Some(value) = self.header_sep {
             builder = builder.header_sep(value);
         }
@@ -69,7 +69,7 @@ enum SuffixArrayOpt {
     },
 }
 
-impl From<SuffixArrayOpt> for SuffixArrayConfig {
+impl From<SuffixArrayOpt> for SuffixArrayOptions {
     fn from(opt: SuffixArrayOpt) -> Self {
         match opt {
             SuffixArrayOpt::FixedLengthBuckets { len } => Self::FixedLengthBuckets { len },

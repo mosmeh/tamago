@@ -7,7 +7,7 @@ use bitvec::prelude::*;
 use rank9b::Rank9b;
 use serde::{Deserialize, Serialize};
 use std::{io, path::Path};
-use suffix_array::{SuffixArray, SuffixArrayConfig};
+use suffix_array::{SuffixArray, SuffixArrayOptions};
 
 pub const DELIMITER: u8 = b'$';
 
@@ -58,7 +58,7 @@ impl Index {
 
 pub struct IndexBuilder<R: io::Read> {
     reader: fasta::Reader<R>,
-    sa_config: SuffixArrayConfig,
+    sa_options: SuffixArrayOptions,
     header_sep: Option<String>,
 }
 
@@ -72,7 +72,7 @@ impl<R: io::Read> IndexBuilder<R> {
     fn from_reader(reader: fasta::Reader<R>) -> Self {
         Self {
             reader,
-            sa_config: SuffixArrayConfig::FixedLengthBuckets { len: 13 },
+            sa_options: SuffixArrayOptions::FixedLengthBuckets { len: 13 },
             header_sep: None,
         }
     }
@@ -81,8 +81,8 @@ impl<R: io::Read> IndexBuilder<R> {
         Self::from_reader(fasta::Reader::new(reader))
     }
 
-    pub fn sa_config(mut self, sa_config: SuffixArrayConfig) -> Self {
-        self.sa_config = sa_config;
+    pub fn sa_options(mut self, sa_options: SuffixArrayOptions) -> Self {
+        self.sa_options = sa_options;
         self
     }
 
@@ -122,7 +122,7 @@ impl<R: io::Read> IndexBuilder<R> {
             *bvec.get_mut(end - 1).unwrap() = true;
         }
 
-        let sa = SuffixArray::new(&seq, &self.sa_config);
+        let sa = self.sa_options.build(&seq);
         Ok(Index {
             seq,
             ends,
