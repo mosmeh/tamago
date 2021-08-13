@@ -13,7 +13,7 @@ use variable_length_buckets::VariableLengthBuckets;
 use crate::hash::HashFunc;
 
 use serde::{Deserialize, Serialize};
-use std::ops::Range;
+use std::{collections::BTreeMap, ops::Range};
 
 pub enum SuffixArrayOptions {
     FixedLengthBuckets {
@@ -69,7 +69,7 @@ trait SuffixArrayVariant {
         max_hits: usize,
     ) -> Option<(Range<usize>, usize)>;
 
-    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>>;
+    fn bucket_size_distribution(&self) -> BTreeMap<usize, usize>;
 
     fn size_bytes(&self) -> usize;
 }
@@ -110,7 +110,7 @@ impl SuffixArray {
         }
     }
 
-    pub fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
+    pub fn bucket_size_distribution(&self) -> BTreeMap<usize, usize> {
         match self {
             Self::FixedLengthBuckets(sa) => sa.bucket_size_distribution(),
             Self::VariableLengthBuckets(sa) => sa.bucket_size_distribution(),

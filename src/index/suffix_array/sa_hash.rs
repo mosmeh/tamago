@@ -1,7 +1,7 @@
 use crate::{hash::HashFunc, sequence};
 
 use serde::{Deserialize, Serialize};
-use std::ops::Range;
+use std::{collections::BTreeMap, ops::Range};
 use sufsort_rs::sufsort::SA;
 
 // Grabowski, S., and M. Raniszewski. "Compact and Hash Based Variants of the Suffix Array."
@@ -175,8 +175,15 @@ impl super::SuffixArrayVariant for SaHash {
         }
     }
 
-    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
-        None
+    fn bucket_size_distribution(&self) -> BTreeMap<usize, usize> {
+        let mut map = BTreeMap::new();
+        for (begin, end) in &self.hashtable {
+            let size = end - begin;
+            map.entry(size as usize)
+                .and_modify(|i| *i += 1)
+                .or_insert(1);
+        }
+        map
     }
 
     fn size_bytes(&self) -> usize {

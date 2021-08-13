@@ -28,7 +28,7 @@ impl Command for StatsCommand {
 
         match self.info {
             Info::BucketSizeDistribution => {
-                for (k, v) in index.sa.bucket_size_distribution().unwrap().into_iter() {
+                for (k, v) in index.sa.bucket_size_distribution().into_iter() {
                     println!("{}\t{}", k, v);
                 }
             }

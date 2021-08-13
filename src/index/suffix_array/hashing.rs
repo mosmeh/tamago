@@ -1,7 +1,7 @@
-use crate::hash::HashFunc;
+use crate::{hash::HashFunc, sequence};
 
 use serde::{Deserialize, Serialize};
-use std::ops::Range;
+use std::{collections::BTreeMap, ops::Range};
 use sufsort_rs::sufsort::SA;
 
 #[derive(Serialize, Deserialize)]
@@ -26,10 +26,7 @@ impl Hashing {
         let mut counts = vec![0u32; hashtable_len];
         for i in 0..=(text.len() - k) {
             let seq = &text[i..i + k];
-            if seq
-                .iter()
-                .any(|x| *x == 0 || *x == crate::sequence::DUMMY_CODE)
-            {
+            if seq.iter().any(|x| *x == 0 || *x == sequence::DUMMY_CODE) {
                 continue;
             }
             counts[(hash_func.hash(seq) & mask) as usize] += 1;
@@ -52,10 +49,7 @@ impl Hashing {
                 continue;
             }
             let seq = &text[s as usize..][..k];
-            if seq
-                .iter()
-                .any(|x| *x == 0 || *x == crate::sequence::DUMMY_CODE)
-            {
+            if seq.iter().any(|x| *x == 0 || *x == sequence::DUMMY_CODE) {
                 continue;
             }
             let idx = (hash_func.hash(seq) & mask) as usize;
@@ -133,15 +127,15 @@ impl super::SuffixArrayVariant for Hashing {
         }
     }
 
-    fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
-        let mut map = std::collections::BTreeMap::new();
+    fn bucket_size_distribution(&self) -> BTreeMap<usize, usize> {
+        let mut map = BTreeMap::new();
         for i in 0..(self.offsets.len() - 1) {
             let size = self.offsets[i + 1] - self.offsets[i];
             map.entry(size as usize)
                 .and_modify(|i| *i += 1)
                 .or_insert(1);
         }
-        Some(map)
+        map
     }
 
     fn size_bytes(&self) -> usize {
