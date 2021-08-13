@@ -4,9 +4,18 @@ use structopt::StructOpt;
 use tamago::index::Index;
 
 #[derive(StructOpt)]
+enum Info {
+    BucketSizeDistribution,
+    IndexSize,
+}
+
+#[derive(StructOpt)]
 pub struct StatsCommand {
     #[structopt(short, long)]
     index: PathBuf,
+
+    #[structopt(subcommand)]
+    info: Info,
 }
 
 impl Command for StatsCommand {
@@ -17,8 +26,15 @@ impl Command for StatsCommand {
             bincode::deserialize_from(reader)?
         };
 
-        for (k, v) in index.sa.bucket_size_distribution().unwrap().into_iter() {
-            println!("{}\t{}", k, v);
+        match self.info {
+            Info::BucketSizeDistribution => {
+                for (k, v) in index.sa.bucket_size_distribution().unwrap().into_iter() {
+                    println!("{}\t{}", k, v);
+                }
+            }
+            Info::IndexSize => {
+                println!("{}", index.size_bytes());
+            }
         }
 
         Ok(())

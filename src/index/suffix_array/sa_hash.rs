@@ -178,4 +178,10 @@ impl super::SuffixArrayVariant for SaHash {
     fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
         None
     }
+
+    fn size_bytes(&self) -> usize {
+        self.array.len() * std::mem::size_of_val(&self.array[0])
+            + self.lut.len() * std::mem::size_of_val(&self.lut[0])
+            + self.hashtable.len() * std::mem::size_of_val(&self.hashtable[0])
+    }
 }

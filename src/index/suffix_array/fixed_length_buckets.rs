@@ -146,4 +146,9 @@ impl super::SuffixArrayVariant for FixedLengthBuckets {
         }
         Some(map)
     }
+
+    fn size_bytes(&self) -> usize {
+        self.array.len() * std::mem::size_of_val(&self.array[0])
+            + self.offsets.len() * std::mem::size_of_val(&self.offsets[0])
+    }
 }

@@ -183,4 +183,10 @@ impl super::SuffixArrayVariant for VariableLengthBuckets {
     fn bucket_size_distribution(&self) -> Option<std::collections::BTreeMap<usize, usize>> {
         None
     }
+
+    fn size_bytes(&self) -> usize {
+        self.array.len() * std::mem::size_of_val(&self.array[0])
+            + self.offsets.len() * std::mem::size_of_val(&self.offsets[0])
+            + self.buckets.len() * std::mem::size_of_val(&self.buckets[0])
+    }
 }

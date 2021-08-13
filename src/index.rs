@@ -39,6 +39,15 @@ impl Index {
         &self.seq[self.seq_range(seq_id)]
     }
 
+    pub fn size_bytes(&self) -> usize {
+        self.seq.len() * std::mem::size_of_val(&self.seq[0])
+            + self.ends.len() * std::mem::size_of_val(&self.ends[0])
+            + self.rank_dict.size_bytes()
+            + self.name_arena.len() * std::mem::size_of_val(&self.name_arena[0])
+            + self.name_ends.len() * std::mem::size_of_val(&self.name_ends[0])
+            + self.sa.size_bytes()
+    }
+
     pub(crate) fn seq_id_from_pos(&self, pos: usize) -> SequenceId {
         assert!(self.ends[0] <= pos && pos < self.seq.len(), "Out of bounds");
 
